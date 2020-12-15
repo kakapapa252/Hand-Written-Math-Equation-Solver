@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>draw</title>
+
+  </head>
+  <body>
+    <canvas id="paint" width="750" height="450" style="border: 5px solid #000000;"></canvas>
+    <br>
+    <button id="penciltool" type="button" style="height: 25px; width: 100px;" onclick="pencil()">Pencil</button>
+	<button id="erasertool" type="button" style="height: 25px; width: 100px;" onclick="eraser()">Eraser</button> 
+	<button id="resettool" type="button" style="height: 25px; width: 100px;" onclick="reset()">Reset</button>
+
+    
+  <br>
+    
+	<script type="text/javascript" src="new.js"></script>
+
+    <a onclick="prepDownload(this, document.getElementById('paint'), 'imgName.jpeg')">Predict</a>
+  </body>
+</html>
