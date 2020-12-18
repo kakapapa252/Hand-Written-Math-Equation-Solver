@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Draw N Solve</title>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js" integrity="sha256-WVsM3xrcqyuFNF3W1qtIKbHFsD0977nDQA8DCMp1zCw=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js" integrity="sha256-2/3R3NV5zryj0fDjD3cDh+SNiWQ/TJiMVZzAo5FrhiU=" crossorigin="anonymous"></script>
+  </head>
+  <body onload='pencil()'>
+
+  <div style="margin-top: 50px; text-align: center;">
+    <canvas id="paint" width="750" height="350" style="border: 5px solid #000000;"></canvas>
+    <br>
+    <button id="penciltool" type="button" style="height: 25px; width: 100px;" onclick="pencil()">Pencil</button>
+	<button id="erasertool" type="button" style="height: 25px; width: 100px;" onclick="eraser()">Eraser</button> 
+	<button id="resettool" type="button" style="height: 25px; width: 100px;" onclick="reset()">Reset</button>
+  <br>
+  <button type="button" onclick="predict()">Predict</button>
+  <br>
+   </div>
+  <div style="margin-top: 50px; text-align: center;">
+      <div>
+        Equation:
+        <div id=operation-container></div>
+      </div>
+
+      <div style="margin-top: 25px">
+        Solution:
+        <div id=solution-container></div>
+      </div>
+    </div>
+	<script type="text/javascript">
+var canvas = document.getElementById("paint");
+var ctx = canvas.getContext("2d");
+ctx.fillStyle = "#FFFFFF";
+ctx.fillRect(0, 0, 750, 350);
+var width = canvas.width;
+var height = canvas.height;
+
+function pencil (){
+    canvas.onmousedown = function (e){
+        curX = e.clientX - canvas.offsetLeft;
+        curY = e.clientY - canvas.offsetTop;
+        hold = true;
+             
+        prevX = curX;
+        prevY = curY;
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+    };
+         
+    canvas.onmousemove = function (e){
+        if(hold){
+            curX = e.clientX - canvas.offsetLeft;
+            curY = e.clientY - canvas.offsetTop;
+            color2();
+            draw();
+        }
+    };
+         
+    canvas.onmouseup = function (e){
+        hold = false;
+    };
+         
+    canvas.onmouseout = function (e){
+        hold = false;
+    };
+
+    function color2 () {
+    	ctx.strokeStyle = "#000000";
+    	ctx.lineWidth = 4;
+    };
+         
+    function draw (){
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+        canvas_data.pencil.push({ "startx": prevX, "starty": prevY, "endx": curX, "endy": curY, 
+            "thick": ctx.lineWidth, "color": ctx.strokeStyle });
+    }
+}
+
+function eraser (){
+    canvas.onmousedown = function (e){
+        curX = e.clientX - canvas.offsetLeft;
+        curY = e.clientY - canvas.offsetTop;
+        hold = true;
+             
+        prevX = curX;
+        prevY = curY;
+        ctx.beginPath();
+        ctx.moveTo(prevX, prevY);
+    };
+         
+    canvas.onmousemove = function (e){
+        if(hold){
+            curX = e.clientX - canvas.offsetLeft;
+            curY = e.clientY - canvas.offsetTop;
+            color();
+            erase();
+        }
+    };
+         
+    canvas.onmouseup = function (e){
+        hold = false;
+    };
+         
+    canvas.onmouseout = function (e){
+        hold = false;
+    };
+         
+    function color () {
+    	ctx.strokeStyle = "#FFFFFF";
+    	ctx.lineWidth = 15;
+    };
+
+    function erase (){
+        ctx.lineTo(curX, curY);
+        ctx.stroke();
+        canvas_data.pencil.push({ "startx": prevX, "starty": prevY, "endx": curX, "endy": curY, 
+            "thick": ctx.lineWidth, "color": ctx.strokeStyle });
+    }
+}
+
+
+function reset (){
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+    pencil();
+    $('#operation-container').html("-");
+    $('#solution-container').html("-");
+    }
+
+function predict() {
+
+        const base64CanvasD1 = canvas.toDataURL('image/png').replace('data:image/png;base64,', '');
+
+        const data = {
+          operation: base64CanvasD1,
+        }
+
+        $.ajax({
+          url: '/predict',
+          type:'POST',
+          data,
+        }).done(function(data) {
+            
+            console.log(data)
+            $('#operation-container').html(data.operation);
+            $('#solution-container').html(data.solution);
+        }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest);
+            alert("error");
+        })
+    }
+
+</script>
+  </body>
+</html>

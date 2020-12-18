@@ -38,6 +38,7 @@
         </div>
         <button id="clear" type="button">Clear</button><br>
         <button type="button" onclick="predict()">Predict</button>
+        
     </div>
     <div style="margin-top: 50px; text-align: center;">
       <div>
@@ -59,6 +60,7 @@
             p.background(255);
             document.getElementById('clear').onclick = () => {
                 p.background(255);
+                console.log(p.strokeStyle)
             }
         }
 
