@@ -20,7 +20,7 @@ from django.conf import settings
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('predict/', include('predict.urls'))
+    path('', include('predict.urls'))
 ]
 
 

@@ -1,11 +1,15 @@
 from django.shortcuts import render
 
 # Create your views here.
-from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.http import JsonResponse
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from .ml.ml import Predict
 import os
+import json
+import base64
+from io import BytesIO
 # Create your views here.
 
 
@@ -13,9 +17,24 @@ import os
 def index(request):
     return render(request, "index.html")
 
-def prediction(request):
-    answ  = Predict('/home/kaka-linux/Downloads/imgName.png')
-    print("new",answ)
-    ans = answ + ' = ' + str(eval(answ))
-    os.remove('/home/kaka-linux/Downloads/imgName.png')
-    return render(request, "prediction.html", context={'ans':ans})
+
+
+@csrf_exempt
+def predict(request):
+    if request.method == 'POST':
+        
+        operation = BytesIO(base64.urlsafe_b64decode(request.POST['operation']))
+
+        try:
+            operation = Predict(operation)
+            print(operation)
+            print("eval = " , eval(operation))
+            return JsonResponse({
+            'operation': str(operation),
+            'solution': str(eval(operation)),
+        })
+        except:
+            return JsonResponse({
+            'operation': 'Learn to write',
+            'solution': 'Faggot',
+        })

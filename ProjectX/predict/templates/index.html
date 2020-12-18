@@ -1,123 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <title>draw</title>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Draw N Solve</title>
 
-  </head>
-  <body>
-    <canvas id="paint" width="750" height="450" style="border: 5px solid #000000;"></canvas>
-    <br>
-    <button id="penciltool" type="button" style="height: 25px; width: 100px;" onclick="pencil()">Pencil</button>
-	<button id="erasertool" type="button" style="height: 25px; width: 100px;" onclick="eraser()">Eraser</button> 
-	<button id="resettool" type="button" style="height: 25px; width: 100px;" onclick="reset()">Reset</button>
-  <br>
-  <a onclick="prepDownload(this, document.getElementById('paint'), 'imgName.png')">Predict Result</a>
-  <br>
-  <a href="{% url 'prediction' %}">Show Result</a>
-	<script type="text/javascript">
-var canvas = document.getElementById("paint");
-var ctx = canvas.getContext("2d");
-ctx.fillStyle = "#FFFFFF";
-ctx.fillRect(0, 0, 750, 450);
-var width = canvas.width;
-var height = canvas.height;
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/p5.min.js" integrity="sha256-WVsM3xrcqyuFNF3W1qtIKbHFsD0977nDQA8DCMp1zCw=" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.9.0/addons/p5.dom.min.js" integrity="sha256-2/3R3NV5zryj0fDjD3cDh+SNiWQ/TJiMVZzAo5FrhiU=" crossorigin="anonymous"></script>
 
-function pencil (){
-    canvas.onmousedown = function (e){
-        curX = e.clientX - canvas.offsetLeft;
-        curY = e.clientY - canvas.offsetTop;
-        hold = true;
-             
-        prevX = curX;
-        prevY = curY;
-        ctx.beginPath();
-        ctx.moveTo(prevX, prevY);
-    };
-         
-    canvas.onmousemove = function (e){
-        if(hold){
-            curX = e.clientX - canvas.offsetLeft;
-            curY = e.clientY - canvas.offsetTop;
-            color2();
-            draw();
+    <style>
+        #root, html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            outline: none;
+            box-sizing: border-box;
         }
-    };
-         
-    canvas.onmouseup = function (e){
-        hold = false;
-    };
-         
-    canvas.onmouseout = function (e){
-        hold = false;
-    };
 
-    function color2 () {
-    	ctx.strokeStyle = "#000000";
-    	ctx.lineWidth = 4;
-    };
-         
-    function draw (){
-        ctx.lineTo(curX, curY);
-        ctx.stroke();
-        canvas_data.pencil.push({ "startx": prevX, "starty": prevY, "endx": curX, "endy": curY, 
-            "thick": ctx.lineWidth, "color": ctx.strokeStyle });
-    }
-}
-
-function eraser (){
-    canvas.onmousedown = function (e){
-        curX = e.clientX - canvas.offsetLeft;
-        curY = e.clientY - canvas.offsetTop;
-        hold = true;
-             
-        prevX = curX;
-        prevY = curY;
-        ctx.beginPath();
-        ctx.moveTo(prevX, prevY);
-    };
-         
-    canvas.onmousemove = function (e){
-        if(hold){
-            curX = e.clientX - canvas.offsetLeft;
-            curY = e.clientY - canvas.offsetTop;
-            color();
-            erase();
+        #container {
+            margin-top: 200px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
-    };
-         
-    canvas.onmouseup = function (e){
-        hold = false;
-    };
-         
-    canvas.onmouseout = function (e){
-        hold = false;
-    };
-         
-    function color () {
-    	ctx.strokeStyle = "#FFFFFF";
-    	ctx.lineWidth = 15;
-    };
 
-    function erase (){
-        ctx.lineTo(curX, curY);
-        ctx.stroke();
-        canvas_data.pencil.push({ "startx": prevX, "starty": prevY, "endx": curX, "endy": curY, 
-            "thick": ctx.lineWidth, "color": ctx.strokeStyle });
+        .draw {
+            border: 1px solid #000;
+            margin-right: 5px;
+        }
+    </style>
+</head>
+<body onload="onLoad()">
+    <div id="container">
+        <div id="operation" class="draw">
+        </div>
+        <button id="clear" type="button">Clear</button><br>
+        <button type="button" onclick="predict()">Predict</button>
+    </div>
+    <div style="margin-top: 50px; text-align: center;">
+      <div>
+        Equation:
+        <div id=operation-container></div>
+      </div>
+
+      <div style="margin-top: 25px">
+        Solution:
+        <div id=solution-container></div>
+      </div>
+    </div>
+
+    <script type="text/javascript">
+    let p5Obj;
+    const s = p => {
+        p.setup = () => {
+            p.createCanvas(750, 350);
+            p.background(255);
+            document.getElementById('clear').onclick = () => {
+                p.background(255);
+            }
+        }
+
+        p.draw = () => {}
+
+        p.mouseDragged = () => {
+            p.stroke(0);
+            p.strokeWeight(3);
+            p.line(p.mouseX, p.mouseY, p.pmouseX, p.pmouseY);
+        }
     }
-}
 
-
-function reset (){
-        ctx.clearRect(0, 0, width, height);
-        pencil();
+    function onLoad() {
+      p5Obj = new p5(s, 'operation');
     }
 
-function prepDownload(a, canvas, name) {
-    a.download = name
-    a.href = canvas.toDataURL()
-}
+    function predict() {
+        const canvasD1 = document.getElementById('defaultCanvas0');
+        const base64CanvasD1 = canvasD1.toDataURL('image/png').replace('data:image/png;base64,', '');
 
-</script>
-  </body>
+        const data = {
+          operation: base64CanvasD1,
+        }
+
+        $.ajax({
+          url: '/predict',
+          type:'POST',
+          data,
+        }).done(function(data) {
+            
+            console.log(data)
+            $('#operation-container').html(data.operation);
+            $('#solution-container').html(data.solution);
+        }).fail(function(XMLHttpRequest, textStatus, errorThrown) {
+            console.log(XMLHttpRequest);
+            alert("error");
+        })
+    }
+    </script>
+</body>
 </html>

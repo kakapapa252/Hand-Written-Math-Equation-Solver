@@ -10,17 +10,18 @@ from keras.layers.convolutional import MaxPooling2D
 from keras.utils import np_utils
 from keras.models import model_from_json
 import matplotlib.pyplot as plt
+from PIL import Image
 
-
-def Predict(file_path):
+def Predict(operationBytes):
     json_file = open('predict/ml/model_final.json', 'r')
     loaded_model_json = json_file.read()
     json_file.close()
+    
     loaded_model = model_from_json(loaded_model_json)
     # load weights into new model
     loaded_model.load_weights("predict/ml/model_final.h5")
-
-    img = cv2.imread(file_path,cv2.IMREAD_GRAYSCALE)
+    Image.open(operationBytes).save('aux.png')
+    img = cv2.imread('aux.png',cv2.IMREAD_GRAYSCALE)
     #kernel = np.ones((3,3),np.uint8)
     '''cv2.imshow("wo",img)
     cv2.waitKey(0)
