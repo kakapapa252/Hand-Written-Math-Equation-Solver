@@ -35,6 +35,6 @@ def predict(request):
         })
         except:
             return JsonResponse({
-            'operation': 'Learn to write',
-            'solution': 'Faggot',
+            'operation': 'Cannot Understand,',
+            'solution': 'Yet',
         })
